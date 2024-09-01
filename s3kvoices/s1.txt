@@ -1,0 +1,7 @@
+SONIC 3 & KNUCKLES UNIVERSAL VOICE BANK
+
+Classic Sonic Bass :
+Use voice $22 (22StrikelikeSlapBass.bin)
+
+Classic Sonic Trumpet :
+Use voice $06 (06SynthBrass1.bin)

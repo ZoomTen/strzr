@@ -1,0 +1,102 @@
+; ---------------------------------------------------------------------------
+; Align (align length)
+; ---------------------------------------------------------------------------
+align macro
+	cnop 0,\1
+	endm
+; ---------------------------------------------------------------------------
+; Load Nemesis compressed art (Art address, VRAM location)
+; ---------------------------------------------------------------------------
+loadnem	macro	art,	vram
+	move.l	#($40000000+((vram&$3FFF)<<16)+((vram&$C000)>>14)),($C00004).l
+	lea	(art).l,a0
+	jsr	NemDec
+	endm
+; ---------------------------------------------------------------------------
+; Load Enigma compressed map (Map address, destination, tile offset)
+; ---------------------------------------------------------------------------
+loadeni	macro	map,	destination,	offset
+	lea	($FF0000+\destination).l,a1
+	lea	(map).l,a0
+	move.w	#offset,d0
+	jsr	EniDec
+	endm
+; ---------------------------------------------------------------------------
+; Copy something to RAM for d0*2 bytes (Source, length, RAM address)
+; ---------------------------------------------------------------------------
+copy	macro	source,	size,	dest
+	lea	(dest).l,a0
+	lea	(source).l,a1
+	move.w	#size,d0
+	jsr	CopyRAM
+	endm
+; ---------------------------------------------------------------------------
+; Fill a byte to RAM for d1*2 bytes (RAM address, fill byte, length)
+; ---------------------------------------------------------------------------
+fill	macro	dest,	fill,	size
+	lea	(dest).l,a0
+	moveq	#fill,d0
+	move.w	#size,d1
+	jsr	FillRAM
+	endm
+; ---------------------------------------------------------------------------
+; Copy map to VDP (Source [usually $FF0000], destination, width and height)
+; ---------------------------------------------------------------------------
+show	macro source,loc,width,height
+	lea	($FF0000+\source).l,a1
+	move.l	#$40000000+((loc&$3FFF)<<16)+((loc&$C000)>>14),d0
+	moveq	#width,d1
+	moveq	#height,d2
+	jsr	ShowVDPGraphics
+	endm
+; ---------------------------------------------------------------------------
+; Interrupts
+; ---------------------------------------------------------------------------
+disable_ints:	macro
+	move	#$2700,sr	;disable interrupts
+	endm
+enable_ints:	macro
+	move	#$2300,sr	;enable interrupts
+	endm
+; ---------------------------------------------------------------------------
+; Setup VDP
+; ---------------------------------------------------------------------------
+SetVDP	macro	reg,data
+	move.w	#((128+reg)*256+data),($C00004)
+	endm
+; ---------------------------------------------------------------------------
+; Play music / sound
+; ---------------------------------------------------------------------------
+music	macro
+	move.b	#\1,($FFFFF00A).w
+	endm
+sound	macro
+	move.b	#\1,($FFFFF00B).w
+	endm
+; ---------------------------------------------------------------------------
+; Set screen mode
+; ---------------------------------------------------------------------------
+mode	macro	modenum
+	move.b	#(modenum*4),($FFFFF600).w
+	endm
+; ---------------------------------------------------------------------------
+; Set palettes
+; ---------------------------------------------------------------------------
+palmain	macro	pal,	entry
+	move.w	#pal,($FFFFFB00+(entry*2)).w
+	endm
+paldup	macro	pal,	entry
+	move.w	#pal,($FFFFFB80+(entry*2)).w
+	endm
+; ---------------------------------------------------------------------------
+; Set demo time in seconds
+; ---------------------------------------------------------------------------
+demotime	macro	second
+		move.w	#(\second*60),($FFFFF614).w
+		endm
+; ---------------------------------------------------------------------------
+; Set VRAM write address
+; ---------------------------------------------------------------------------
+vram	macro
+	move.l	#($40000000+((\1&$3FFF)<<16)+((\1&$C000)>>14)),($C00004).l
+	endm
